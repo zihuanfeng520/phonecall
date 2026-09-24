@@ -7,5 +7,5 @@
   "callingText": "邀請你視訊通話...",
   "endingText": "毛怪趕快接電話!",
   "vibrateOnRing": true,
-  "loopVideo": false
+  "loopVideo": true
 }
