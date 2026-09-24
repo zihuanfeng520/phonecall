@@ -1,11 +1,11 @@
 {
-  "callerName": "小明",
+  "callerName": "hanser",
   "callerAvatar": "assets/avatars/avatar.jpg",
   "backgroundImage": "assets/bg/background.jpg",
   "ringtone": "assets/audio/ringtone.mp3",
   "video": "assets/videos/message.mp4",
   "callingText": "邀請你視訊通話...",
-  "endingText": "新年快樂,萬事如意!",
+  "endingText": "毛怪趕快接電話!",
   "vibrateOnRing": true,
   "loopVideo": false
 }
