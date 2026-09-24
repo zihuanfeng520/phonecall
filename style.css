@@ -1,0 +1,142 @@
+:root{
+  --accent: #2ecc71;
+  box-sizing: border-box;
+}
+*{ box-sizing: inherit; margin:0; padding:0; }
+
+html, body{
+  height:100%;
+  background:#000;
+  font-family: "PingFang TC","Microsoft JhengHei",sans-serif;
+  overflow:hidden;
+}
+
+.screen{
+  position:fixed;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  color:#fff;
+  text-align:center;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.screen.active{ display:flex; }
+
+/* 背景圖層 */
+.bg-layer{
+  position:absolute;
+  inset:0;
+  background: #7a0e0e center/cover no-repeat;
+  z-index:-1;
+}
+
+/* 頭像 */
+.avatar-wrap{
+  position:relative;
+  margin-top: 12vh;
+  width:180px;
+  height:180px;
+}
+.avatar-ring{
+  position:absolute;
+  inset:-14px;
+  border-radius:16px;
+  border:3px solid rgba(255,215,0,.9);
+  box-shadow:0 0 0 0 rgba(255,215,0,.6);
+  animation: pulseGlow 1.8s ease-out infinite;
+}
+@keyframes pulseGlow{
+  0%   { box-shadow:0 0 0 0 rgba(255,215,0,.55); }
+  70%  { box-shadow:0 0 0 22px rgba(255,215,0,0); }
+  100% { box-shadow:0 0 0 0 rgba(255,215,0,0); }
+}
+.avatar{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:12px;
+  border:2px solid rgba(255,215,0,.9);
+  background:#ccc;
+}
+
+.caller-name{
+  margin-top:28px;
+  font-size:2rem;
+  font-weight:600;
+  letter-spacing:.05em;
+}
+.calling-text{
+  margin-top:14px;
+  font-size:1.1rem;
+  opacity:.85;
+}
+
+/* 接聽按鈕 */
+.answer-wrap{
+  position:absolute;
+  bottom: calc(8vh + env(safe-area-inset-bottom, 0px));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+.answer-btn{
+  width:74px;
+  height:74px;
+  border-radius:50%;
+  border:none;
+  background:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 0 0 0 rgba(46,204,113,.6);
+  animation: ripple 1.6s ease-out infinite;
+}
+@keyframes ripple{
+  0%   { box-shadow:0 0 0 0 rgba(46,204,113,.55); }
+  70%  { box-shadow:0 0 0 26px rgba(46,204,113,0); }
+  100% { box-shadow:0 0 0 0 rgba(46,204,113,0); }
+}
+.phone-icon{
+  width:32px;
+  height:32px;
+  fill:#fff;
+}
+.answer-label{
+  font-size:.95rem;
+  opacity:.9;
+}
+
+/* 影片畫面 */
+#videoScreen{
+  background:#000;
+  justify-content:center;
+}
+#callVideo{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
+}
+
+/* 結尾畫面 */
+.ending-text{
+  margin-top:40vh;
+  font-size:1.4rem;
+  font-weight:600;
+  padding:0 24px;
+}
+.replay-btn{
+  margin-top:28px;
+  padding:10px 24px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.6);
+  background:transparent;
+  color:#fff;
+  font-size:1rem;
+  cursor:pointer;
+}
+.replay-btn:active{ opacity:.7; }

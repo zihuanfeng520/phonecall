@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>視訊來電</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 來電畫面 -->
+  <section id="callingScreen" class="screen active">
+    <div class="bg-layer" id="bgLayer"></div>
+
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <img id="avatarImg" class="avatar" src="" alt="頭像">
+    </div>
+
+    <h1 id="callerName" class="caller-name"></h1>
+    <p id="callingText" class="calling-text"></p>
+
+    <div class="answer-wrap">
+      <button id="answerBtn" class="answer-btn" aria-label="接聽">
+        <svg viewBox="0 0 24 24" class="phone-icon">
+          <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.49a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.25 1.01l-2.2 2.22z"/>
+        </svg>
+      </button>
+      <span class="answer-label">接聽</span>
+    </div>
+  </section>
+
+  <!-- 視訊/影片畫面 -->
+  <section id="videoScreen" class="screen">
+    <video id="callVideo" playsinline></video>
+  </section>
+
+  <!-- 結尾畫面 -->
+  <section id="endingScreen" class="screen">
+    <div class="bg-layer" id="bgLayerEnd"></div>
+    <p id="endingText" class="ending-text"></p>
+    <button id="replayBtn" class="replay-btn">重新播放</button>
+  </section>
+
+  <audio id="ringtoneAudio" loop></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
