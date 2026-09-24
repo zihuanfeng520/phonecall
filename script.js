@@ -38,14 +38,34 @@
   }
   if (config.ringtone) {
     ringtoneAudio.src = config.ringtone;
+    ringtoneAudio.load();
   }
   if (config.video) {
     callVideo.src = config.video;
   }
   callVideo.loop = !!config.loopVideo;
 
-  // 嘗試自動播放鈴聲(部分瀏覽器需使用者手動互動才能出聲,失敗則忽略)
-  ringtoneAudio.play().catch(() => {});
+  // 嘗試自動播放鈴聲。多數行動瀏覽器會擋掉「頁面一載入就出聲」的自動播放,
+  // 若被擋下,改成監聽第一次點擊/觸碰畫面時補播,確保鈴聲一定會響。
+  let ringtoneStarted = false;
+
+  function tryPlayRingtone() {
+    if (ringtoneStarted) return;
+    ringtoneAudio.play()
+      .then(() => { ringtoneStarted = true; })
+      .catch(() => { /* 自動播放被擋下,等待使用者互動 */ });
+  }
+
+  tryPlayRingtone();
+
+  // 使用者在畫面上任何一次點擊/觸碰,都嘗試補播鈴聲(僅補播一次)
+  const unlockRingtone = () => {
+    if (!ringtoneStarted) tryPlayRingtone();
+    document.removeEventListener('click', unlockRingtone);
+    document.removeEventListener('touchstart', unlockRingtone);
+  };
+  document.addEventListener('click', unlockRingtone);
+  document.addEventListener('touchstart', unlockRingtone);
 
   function showScreen(el) {
     [callingScreen, videoScreen, endingScreen].forEach(s => s.classList.remove('active'));
