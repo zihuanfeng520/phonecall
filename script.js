@@ -133,6 +133,24 @@
   function getThresholdPx() { return window.innerHeight * UNLOCK_THRESHOLD_RATIO; }
   function getProgress() { return Math.min(1, Math.abs(dragDelta) / getThresholdPx()); }
 
+  // 保險機制:transitionend 在「數值其實沒有變化」時不會觸發(例如拖曳過程
+  // 已經把透明度即時降到 0,放開手時再設一次同樣的 0,瀏覽器不會視為有變化)。
+  // 這裡改成「動畫真的結束」或「時間到了」兩者取先發生的那個,一定會執行收尾,
+  // 避免鎖屏卡成一層看不見但還擋著點擊的透明層。
+  function afterTransition(el, fallbackMs, callback) {
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      el.removeEventListener('transitionend', onEnd);
+      clearTimeout(timer);
+      callback();
+    };
+    const onEnd = (e) => { if (e.target === el) finish(); };
+    el.addEventListener('transitionend', onEnd);
+    const timer = setTimeout(finish, fallbackMs);
+  }
+
   function onDragStart(clientY) {
     dragging = true;
     startY = clientY;
@@ -186,17 +204,19 @@
     screens.calling.classList.add('crossfading');
     screens.calling.style.opacity = '0';
 
-    const onEnd = () => {
-      lockScreenEl.removeEventListener('transitionend', onEnd);
+    afterTransition(lockScreenEl, 350, () => {
       lockScreenEl.classList.remove('animating');
       screens.calling.classList.remove('active', 'crossfading');
       screens.calling.style.opacity = '';
-    };
-    lockScreenEl.addEventListener('transitionend', onEnd);
+    });
   }
 
   function unlockSuccess() {
-    // 達門檻:繼續淡到底,鎖屏完全透明、響鈴畫面完全不透明
+    // 達門檻:確定要解鎖了 → 立刻讓鎖屏不再吃點擊事件,
+    // 避免它變成看不見但還蓋在上面、擋住下面按鈕的透明層
+    lockScreenEl.style.pointerEvents = 'none';
+
+    // 繼續淡到底,鎖屏完全透明、響鈴畫面完全不透明
     lockScreenEl.classList.add('animating');
     swipeHandle.classList.add('snap');
     lockScreenEl.style.opacity = '0';
@@ -207,16 +227,15 @@
     // 解鎖動作是使用者手勢的直接延續,在此同步呼叫 play() 才符合瀏覽器自動播放政策
     ringtoneAudio.play().catch(() => {});
 
-    const onEnd = () => {
-      lockScreenEl.removeEventListener('transitionend', onEnd);
+    afterTransition(lockScreenEl, 350, () => {
       lockScreenEl.classList.remove('animating');
       lockScreenEl.style.opacity = '';
       lockScreenEl.style.transform = '';
+      lockScreenEl.style.pointerEvents = '';
       screens.calling.classList.remove('crossfading');
       screens.calling.style.opacity = '';
       showScreen('calling');
-    };
-    lockScreenEl.addEventListener('transitionend', onEnd);
+    });
   }
 
   swipeHandle.addEventListener('touchstart', e => onDragStart(e.touches[0].clientY), { passive: true });
@@ -307,6 +326,7 @@
     lockScreenEl.classList.remove('animating');
     lockScreenEl.style.opacity = '';
     lockScreenEl.style.transform = '';
+    lockScreenEl.style.pointerEvents = '';
     swipeHandle.classList.remove('snap');
     swipeHandle.style.transform = '';
     screens.calling.classList.remove('active', 'crossfading');
