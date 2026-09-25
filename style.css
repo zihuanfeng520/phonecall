@@ -1,14 +1,17 @@
 :root{
   --accent: #2ecc71;
+  --accent-video: #3ba7e0;
   box-sizing: border-box;
 }
-*{ box-sizing: inherit; margin:0; padding:0; }
+*{ margin:0; padding:0; box-sizing: inherit; }
 
 html, body{
   height:100%;
   background:#000;
   font-family: "PingFang TC","Microsoft JhengHei",sans-serif;
   overflow:hidden;
+  -webkit-user-select:none;
+  user-select:none;
 }
 
 .screen{
@@ -24,18 +27,145 @@ html, body{
 }
 .screen.active{ display:flex; }
 
-/* 背景圖層 */
 .bg-layer{
   position:absolute;
   inset:0;
-  background: #7a0e0e center/cover no-repeat;
+  background:#7a0e0e center/cover no-repeat;
   z-index:-1;
 }
 
-/* 頭像 */
+/* ===================== 鎖屏畫面 ===================== */
+#lockScreen{
+  justify-content:flex-start;
+  touch-action:none;
+}
+.lock-status{
+  margin-top: calc(8vh + env(safe-area-inset-top,0px));
+}
+.lock-time{
+  font-size:3.2rem;
+  font-weight:300;
+  letter-spacing:.02em;
+}
+.lock-date{
+  margin-top:6px;
+  font-size:1rem;
+  opacity:.85;
+}
+.lock-battery{
+  margin-top:16px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:.85rem;
+  opacity:.9;
+}
+.battery-icon{
+  position:relative;
+  width:22px;
+  height:11px;
+  border:1.5px solid #fff;
+  border-radius:2px;
+  display:inline-block;
+}
+.battery-icon::after{
+  content:"";
+  position:absolute;
+  right:-4px;
+  top:3px;
+  width:2px;
+  height:5px;
+  background:#fff;
+  border-radius:0 1px 1px 0;
+}
+.battery-fill{
+  display:block;
+  height:100%;
+  width:99%;
+  background:#fff;
+}
+
+.day-progress-wrap{
+  margin-top:28px;
+  width:70%;
+  max-width:320px;
+}
+.day-progress-label{
+  font-size:.75rem;
+  opacity:.75;
+  margin-bottom:6px;
+}
+.day-progress-track{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.25);
+  overflow:hidden;
+}
+.day-progress-fill{
+  height:100%;
+  width:0%;
+  background:#fff;
+  border-radius:999px;
+  transition:width 1s linear;
+}
+
+/* 上滑解鎖區 */
+.swipe-wrap{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding-bottom: calc(6vh + env(safe-area-inset-bottom,0px));
+}
+.swipe-hint{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-bottom:14px;
+  animation: hintFloat 1.6s ease-in-out infinite;
+}
+.chevron{
+  font-size:1.6rem;
+  line-height:1;
+  opacity:.9;
+}
+.swipe-text{
+  font-size:.85rem;
+  opacity:.8;
+  margin-top:2px;
+}
+@keyframes hintFloat{
+  0%,100%{ transform:translateY(0); opacity:.55; }
+  50%{ transform:translateY(-8px); opacity:1; }
+}
+.swipe-handle{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:rgba(255,255,255,.9);
+  box-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+
+/* 解鎖成功後,整個鎖屏往上滑出的動畫 */
+#lockScreen.unlocking{
+  transition: transform .38s cubic-bezier(.2,.8,.3,1);
+}
+#lockScreen.slide-up{
+  transform: translateY(-100%);
+}
+/* 未達門檻回彈 */
+#lockScreen.spring-back{
+  transition: transform .28s ease-out;
+}
+
+/* ===================== 響鈴畫面 ===================== */
 .avatar-wrap{
   position:relative;
-  margin-top: 12vh;
+  margin-top: 10vh;
   width:180px;
   height:180px;
 }
@@ -62,67 +192,171 @@ html, body{
 }
 
 .caller-name{
-  margin-top:28px;
+  margin-top:24px;
   font-size:2rem;
   font-weight:600;
   letter-spacing:.05em;
 }
 .calling-text{
-  margin-top:14px;
+  margin-top:12px;
   font-size:1.1rem;
   opacity:.85;
 }
 
-/* 接聽按鈕 */
-.answer-wrap{
+.answer-row{
   position:absolute;
-  bottom: calc(8vh + env(safe-area-inset-bottom, 0px));
+  bottom: calc(8vh + env(safe-area-inset-bottom,0px));
+  display:flex;
+  gap:54px;
+}
+.answer-item{
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:10px;
 }
+.answer-btn-box{
+  position:relative;
+  width:70px;
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ripple-svg{
+  position:absolute;
+  width:160px;
+  height:160px;
+  pointer-events:none;
+}
 .answer-btn{
-  width:74px;
-  height:74px;
+  position:relative;
+  z-index:1;
+  width:70px;
+  height:70px;
   border-radius:50%;
   border:none;
-  background:var(--accent);
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  box-shadow:0 0 0 0 rgba(46,204,113,.6);
-  animation: ripple 1.6s ease-out infinite;
 }
-@keyframes ripple{
-  0%   { box-shadow:0 0 0 0 rgba(46,204,113,.55); }
-  70%  { box-shadow:0 0 0 26px rgba(46,204,113,0); }
-  100% { box-shadow:0 0 0 0 rgba(46,204,113,0); }
+.phone-answer{ background:var(--accent); }
+.video-answer{ background:var(--accent-video); }
+.phone-icon{ width:30px; height:30px; fill:#fff; }
+.answer-label{ font-size:.9rem; opacity:.9; }
+
+/* ===================== 電話通話畫面 ===================== */
+#phoneCallScreen{
+  justify-content:flex-start;
 }
-.phone-icon{
-  width:32px;
-  height:32px;
-  fill:#fff;
-}
-.answer-label{
+.call-topbar{
+  margin-top: calc(3vh + env(safe-area-inset-top,0px));
   font-size:.95rem;
   opacity:.9;
 }
-
-/* 影片畫面 */
-#videoScreen{
-  background:#000;
-  justify-content:center;
+.call-avatar-wrap{
+  margin-top:8vh;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.5);
 }
-#callVideo{
+.call-avatar{
   width:100%;
   height:100%;
-  object-fit:contain;
-  background:#000;
+  object-fit:cover;
+  background:#333;
+}
+.call-name{
+  margin-top:18px;
+  font-size:1.5rem;
+  font-weight:600;
+}
+.call-number{
+  margin-top:6px;
+  font-size:.95rem;
+  opacity:.75;
+  letter-spacing:.03em;
+}
+.call-duration{
+  margin-top:10px;
+  font-size:1rem;
+  opacity:.85;
+  font-variant-numeric: tabular-nums;
 }
 
-/* 結尾畫面 */
+.call-grid{
+  margin-top:6vh;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px 34px;
+  padding: 0 12%;
+}
+.call-grid-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  font-size:.8rem;
+  opacity:.9;
+  cursor:pointer;
+}
+.call-icon-circle{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.call-grid-item.active .call-icon-circle{
+  background:#fff;
+}
+.call-grid-item.active .call-icon-circle span{
+  filter: invert(1);
+}
+.icon-contact, .icon-mute, .icon-note, .icon-speaker, .icon-hold, .icon-add{
+  width:22px;
+  height:22px;
+  display:inline-block;
+  background:#fff;
+  -webkit-mask-size:contain;
+  mask-size:contain;
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  mask-position:center;
+}
+.icon-contact{ -webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5z"/></svg>'); mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5z"/></svg>'); }
+.icon-mute{ -webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-3.08A7 7 0 0019 11h-2z"/></svg>'); mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-3.08A7 7 0 0019 11h-2z"/></svg>'); }
+.icon-note{ -webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 3h14v18l-7-4-7 4V3z"/></svg>'); mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 3h14v18l-7-4-7 4V3z"/></svg>'); }
+.icon-speaker{ -webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 00-2.5-4.03v8.06A4.5 4.5 0 0016.5 12z"/></svg>'); mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 00-2.5-4.03v8.06A4.5 4.5 0 0016.5 12z"/></svg>'); }
+.icon-hold{ -webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5h3v14H8zM13 5h3v14h-3z"/></svg>'); mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5h3v14H8zM13 5h3v14h-3z"/></svg>'); }
+.icon-add{ -webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'); mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'); }
+
+.hangup-btn{
+  position:absolute;
+  bottom: calc(7vh + env(safe-area-inset-bottom,0px));
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  border:none;
+  background:#e74c3c;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.hangup-icon{ width:30px; height:30px; fill:#fff; }
+
+/* ===================== 影片畫面 ===================== */
+#videoScreen{ background:#000; justify-content:center; }
+#callVideo{ width:100%; height:100%; object-fit:contain; background:#000; }
+
+/* ===================== 結尾畫面 ===================== */
 .ending-text{
   margin-top:40vh;
   font-size:1.4rem;

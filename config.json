@@ -1,11 +1,16 @@
 {
-  "callerName": "hanser",
+  "callerName": "小明",
+  "callerPhone": "0912 345 678",
   "callerAvatar": "assets/avatars/avatar.jpg",
+  "lockBackground": "assets/bg/background.jpg",
   "backgroundImage": "assets/bg/background.jpg",
   "ringtone": "assets/audio/ringtone.mp3",
+  "callAudio": "assets/audio/message.mp3",
   "video": "assets/videos/message.mp4",
   "callingText": "邀請你視訊通話...",
-  "endingText": "毛怪趕快接電話!",
+  "endingText": "新年快樂,萬事如意!",
   "vibrateOnRing": true,
-  "loopVideo": true
+  "loopVideo": false,
+  "loopCallAudio": false,
+  "defaultBatteryPercent": 99
 }

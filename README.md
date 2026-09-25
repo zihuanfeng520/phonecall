@@ -1,27 +1,39 @@
-# Phonecall
-
-https://zihuanfeng520.github.io/phonecall/
+# phonecall
 
 模擬「視訊來電 → 接聽 → 播放影片」互動頁面的靜態網站範本。
 純前端(HTML/CSS/JS),可直接部署到 GitHub Pages,不需要伺服器。
+
+## 流程(v2)
+
+```
+鎖屏畫面(上滑解鎖)
+   │  未達門檻 → 回彈,不解鎖、不出聲
+   ▼ 達門檻
+響鈴畫面(電話 / 視訊 兩個按鈕)
+   ├─ 按「電話」→ 電話通話畫面,播放 callAudio(message.mp3),秒數即時累加
+   └─ 按「視訊」→ 全螢幕播放 video(message.mp4)
+   ▼ 掛斷 / 影片播完
+結尾畫面(祝福文字 + 重新播放,回到鎖屏重來一次)
+```
 
 ## 專案結構
 
 ```
 phonecall/
-├── index.html          # 主頁面(來電畫面 / 影片畫面 / 結尾畫面)
+├── index.html          # 主頁面(鎖屏 / 響鈴 / 電話通話 / 視訊 / 結尾,共 5 個畫面)
 ├── style.css            # 樣式與動畫
-├── script.js             # 邏輯(讀取 config.json、控制畫面切換)
+├── script.js             # 邏輯(讀取 config.json、解鎖判斷、即時時間/電量、通話計時)
 ├── config.json           # ★ 你唯一需要編輯的設定檔
 └── assets/
     ├── avatars/
     │   └── avatar.jpg    # 來電頭像圖片
     ├── bg/
-    │   └── background.jpg # 背景圖(紅底祝福紋理之類)
+    │   └── background.jpg # 背景圖(鎖屏 / 響鈴 / 通話畫面共用,可分開設定)
     ├── audio/
-    │   └── ringtone.mp3   # 鈴聲音效
+    │   ├── ringtone.mp3   # 解鎖成功後、響鈴畫面播放的鈴聲
+    │   └── message.mp3    # 按「電話」接聽後,在電話通話畫面播放的音檔
     └── videos/
-        └── message.mp4    # 接聽後播放的影片
+        └── message.mp4    # 按「視訊」接聽後,全螢幕播放的影片
 ```
 
 ## 如何放入你自己的素材
@@ -41,21 +53,36 @@ phonecall/
 ```json
 {
   "callerName": "顯示的來電者姓名",
+  "callerPhone": "電話通話畫面顯示的電話號碼",
   "callerAvatar": "assets/avatars/avatar.jpg",
+  "lockBackground": "assets/bg/background.jpg",
   "backgroundImage": "assets/bg/background.jpg",
   "ringtone": "assets/audio/ringtone.mp3",
+  "callAudio": "assets/audio/message.mp3",
   "video": "assets/videos/message.mp4",
   "callingText": "邀請你視訊通話...",
-  "endingText": "影片播完後顯示的祝福文字",
+  "endingText": "影片/通話結束後顯示的祝福文字",
   "vibrateOnRing": true,
-  "loopVideo": false
+  "loopVideo": false,
+  "loopCallAudio": false,
+  "defaultBatteryPercent": 99
 }
 ```
 
-- `callerName` / `callingText` / `endingText`:畫面上顯示的文字,直接改字串即可
-- `callerAvatar` / `backgroundImage` / `ringtone` / `video`:填入相對路徑(照上表放好檔案後,路徑對應更新即可)
-- `vibrateOnRing`:是否在使用者按下接聽時觸發手機震動(僅支援部分行動瀏覽器)
-- `loopVideo`:影片播完是否自動重播(`true`)或跳到結尾畫面(`false`)
+- `callerName` / `callerPhone` / `callingText` / `endingText`:畫面上顯示的文字,直接改字串即可
+- `callerAvatar` / `lockBackground` / `backgroundImage` / `ringtone` / `callAudio` / `video`:填入相對路徑
+  - `lockBackground` 沒填的話,會自動沿用 `backgroundImage`
+  - `callAudio` 是按「電話」接聽後播放的音檔;`video` 是按「視訊」接聽後播放的影片,兩者互不影響
+- `vibrateOnRing`:接聽當下是否觸發手機震動(僅支援部分行動瀏覽器)
+- `loopVideo` / `loopCallAudio`:影片 / 電話音檔播完是否自動重播(`true`)或跳到結尾畫面(`false`)
+- `defaultBatteryPercent`:抓不到裝置電量時(例如桌機瀏覽器)顯示的預設電量
+
+### 關於鎖屏解鎖與電量的技術限制(務必先讀)
+
+- **解鎖判斷**:使用者需要往上滑超過螢幕高度約 32% 才算解鎖成功,滑不夠會自動彈回、不會播放鈴聲。這個比例寫在 `script.js` 的 `UNLOCK_THRESHOLD_RATIO`,可自行調整。
+- **鈴聲只在解鎖成功那個瞬間播放**,這是刻意設計:瀏覽器要求音訊播放必須綁在使用者的手勢操作內才會被允許,解鎖成功的當下正好是一次有效手勢,藉此確保鈴聲一定放得出來。
+- **電量**:`Battery API`(抓取裝置真實電量)目前只有少數瀏覽器(部分 Android WebView)支援,iOS Safari、多數桌機瀏覽器都無法取得,遇到抓不到的情況會直接顯示 `defaultBatteryPercent` 設定的數值,這是瀏覽器層級的限制,無法繞過。
+- **當日進度條**:每秒依裝置本機時間重新計算「現在時間 - 今天 00:00」占 24 小時的比例,即時更新。
 
 > 若你想做「多個不同來電對象」的版本,可以複製整個資料夾為 `person-a/`、`person-b/`,
 > 各自放一份 `config.json` 與 `assets/`,GitHub Pages 會依資料夾產生對應網址,

@@ -8,8 +8,40 @@
 </head>
 <body>
 
-  <!-- 來電畫面 -->
-  <section id="callingScreen" class="screen active">
+  <!-- 鎖屏畫面 -->
+  <section id="lockScreen" class="screen active">
+    <div class="bg-layer" id="bgLockLayer"></div>
+
+    <div class="lock-status">
+      <div class="lock-time" id="lockTime">00:00</div>
+      <div class="lock-date" id="lockDate">1月1日 星期一</div>
+    </div>
+
+    <div class="lock-battery">
+      <span class="battery-icon">
+        <span class="battery-fill" id="batteryFill"></span>
+      </span>
+      <span id="batteryPercent">99%</span>
+    </div>
+
+    <div class="day-progress-wrap">
+      <div class="day-progress-label">今天已過</div>
+      <div class="day-progress-track">
+        <div class="day-progress-fill" id="dayProgressFill"></div>
+      </div>
+    </div>
+
+    <div class="swipe-wrap">
+      <div class="swipe-hint">
+        <span class="chevron">︿</span>
+        <span class="swipe-text">上滑解鎖</span>
+      </div>
+      <div class="swipe-handle" id="swipeHandle" aria-label="上滑解鎖"></div>
+    </div>
+  </section>
+
+  <!-- 來電(響鈴)畫面 -->
+  <section id="callingScreen" class="screen">
     <div class="bg-layer" id="bgLayer"></div>
 
     <div class="avatar-wrap">
@@ -20,14 +52,107 @@
     <h1 id="callerName" class="caller-name"></h1>
     <p id="callingText" class="calling-text"></p>
 
-    <div class="answer-wrap">
-      <button id="answerBtn" class="answer-btn" aria-label="接聽">
-        <svg viewBox="0 0 24 24" class="phone-icon">
-          <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.49a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.25 1.01l-2.2 2.22z"/>
-        </svg>
-      </button>
-      <span class="answer-label">接聽</span>
+    <div class="answer-row">
+      <div class="answer-item">
+        <div class="answer-btn-box">
+          <svg class="ripple-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <circle cx="50%" cy="50%" r="49%" stroke-width="1" stroke="#2ecc71" fill="none" fill-opacity="0">
+              <animate attributeName="r" begin="0s" from="30%" to="49%" dur="1s" repeatCount="indefinite"></animate>
+              <animate attributeName="opacity" begin="0s" from="1" to="0" dur="1s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cx="50%" cy="50%" r="43%" stroke-width="1" stroke="#2ecc71" fill="none" fill-opacity="0">
+              <animate attributeName="r" begin="0.3s" from="30%" to="49%" dur="1s" repeatCount="indefinite"></animate>
+              <animate attributeName="opacity" begin="0.3s" from="1" to="0" dur="1s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cx="50%" cy="50%" r="38%" stroke-width="1" stroke="#2ecc71" fill="none" fill-opacity="0">
+              <animate attributeName="r" begin="0.6s" from="30%" to="49%" dur="1s" repeatCount="indefinite"></animate>
+              <animate attributeName="opacity" begin="0.6s" from="1" to="0" dur="1s" repeatCount="indefinite"></animate>
+            </circle>
+          </svg>
+          <button id="answerPhoneBtn" class="answer-btn phone-answer" aria-label="接聽電話">
+            <svg viewBox="0 0 24 24" class="phone-icon">
+              <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.49a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.25 1.01l-2.2 2.22z"/>
+            </svg>
+          </button>
+        </div>
+        <span class="answer-label">電話</span>
+      </div>
+
+      <div class="answer-item">
+        <div class="answer-btn-box">
+          <svg class="ripple-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <circle cx="50%" cy="50%" r="49%" stroke-width="1" stroke="#3ba7e0" fill="none" fill-opacity="0">
+              <animate attributeName="r" begin="0s" from="30%" to="49%" dur="1s" repeatCount="indefinite"></animate>
+              <animate attributeName="opacity" begin="0s" from="1" to="0" dur="1s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cx="50%" cy="50%" r="43%" stroke-width="1" stroke="#3ba7e0" fill="none" fill-opacity="0">
+              <animate attributeName="r" begin="0.3s" from="30%" to="49%" dur="1s" repeatCount="indefinite"></animate>
+              <animate attributeName="opacity" begin="0.3s" from="1" to="0" dur="1s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cx="50%" cy="50%" r="38%" stroke-width="1" stroke="#3ba7e0" fill="none" fill-opacity="0">
+              <animate attributeName="r" begin="0.6s" from="30%" to="49%" dur="1s" repeatCount="indefinite"></animate>
+              <animate attributeName="opacity" begin="0.6s" from="1" to="0" dur="1s" repeatCount="indefinite"></animate>
+            </circle>
+          </svg>
+          <button id="answerVideoBtn" class="answer-btn video-answer" aria-label="接聽視訊">
+            <svg viewBox="0 0 24 24" class="phone-icon">
+              <path d="M17 10.5V7a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1v-3.5l4 4v-11l-4 4z"/>
+            </svg>
+          </button>
+        </div>
+        <span class="answer-label">視訊</span>
+      </div>
     </div>
+  </section>
+
+  <!-- 電話通話畫面 -->
+  <section id="phoneCallScreen" class="screen">
+    <div class="bg-layer" id="bgPhoneLayer"></div>
+
+    <div class="call-topbar">
+      <span id="callClock">00:00</span>
+    </div>
+
+    <div class="call-avatar-wrap">
+      <img id="phoneAvatarImg" class="call-avatar" src="" alt="頭像">
+    </div>
+
+    <h2 id="phoneCallerName" class="call-name"></h2>
+    <p id="phoneCallerNumber" class="call-number"></p>
+    <p class="call-duration" id="callDuration">00:00</p>
+
+    <div class="call-grid">
+      <div class="call-grid-item">
+        <div class="call-icon-circle"><span class="icon-contact"></span></div>
+        <span>通訊錄</span>
+      </div>
+      <div class="call-grid-item toggleable" id="muteToggle">
+        <div class="call-icon-circle"><span class="icon-mute"></span></div>
+        <span>靜音</span>
+      </div>
+      <div class="call-grid-item">
+        <div class="call-icon-circle"><span class="icon-note"></span></div>
+        <span>筆記</span>
+      </div>
+      <div class="call-grid-item toggleable" id="speakerToggle">
+        <div class="call-icon-circle"><span class="icon-speaker"></span></div>
+        <span>擴音</span>
+      </div>
+      <div class="call-grid-item toggleable" id="holdToggle">
+        <div class="call-icon-circle"><span class="icon-hold"></span></div>
+        <span>暫停通話</span>
+      </div>
+      <div class="call-grid-item">
+        <div class="call-icon-circle"><span class="icon-add"></span></div>
+        <span>新增通話</span>
+      </div>
+    </div>
+
+    <button id="hangupBtn" class="hangup-btn" aria-label="掛斷">
+      <svg viewBox="0 0 24 24" class="phone-icon hangup-icon">
+        <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85a.99.99 0 01-1.41-.02l-2.34-2.34a1 1 0 01.02-1.44C3.53 8.79 7.55 7 12 7s8.47 1.79 11.55 4.77c.4.38.42 1.02.02 1.44l-2.34 2.34a.99.99 0 01-1.41.02c-.79-.73-1.68-1.36-2.66-1.85a.99.99 0 01-.56-.9v-3.1A16.4 16.4 0 0012 9z" transform="rotate(135 12 12)"/>
+      </svg>
+    </button>
   </section>
 
   <!-- 視訊/影片畫面 -->
@@ -43,6 +168,7 @@
   </section>
 
   <audio id="ringtoneAudio" loop></audio>
+  <audio id="callAudio"></audio>
 
   <script src="script.js"></script>
 </body>
