@@ -30,7 +30,7 @@ html, body{
 .bg-layer{
   position:absolute;
   inset:0;
-  background:#7a0e0e center/cover no-repeat;
+  background:#4a4a4a center/cover no-repeat; /* 沒設定圖片時的預設灰底 */
   z-index:-1;
 }
 

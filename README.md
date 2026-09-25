@@ -28,7 +28,11 @@ phonecall/
     ├── avatars/
     │   └── avatar.jpg    # 來電頭像圖片
     ├── bg/
-    │   └── background.jpg # 背景圖(鎖屏 / 響鈴 / 通話畫面共用,可分開設定)
+    │   ├── lock-bg.jpg       # 鎖屏畫面背景
+    │   ├── calling-bg.jpg    # 響鈴畫面背景
+    │   ├── phonecall-bg.jpg  # 電話通話畫面背景
+    │   └── ending-bg.jpg     # 結尾畫面背景
+    │       (四個畫面各自獨立,沒放圖檔/沒在 config.json 填路徑,該畫面就是灰底)
     ├── audio/
     │   ├── ringtone.mp3   # 解鎖成功後、響鈴畫面播放的鈴聲
     │   └── message.mp3    # 按「電話」接聽後,在電話通話畫面播放的音檔
@@ -55,8 +59,10 @@ phonecall/
   "callerName": "顯示的來電者姓名",
   "callerPhone": "電話通話畫面顯示的電話號碼",
   "callerAvatar": "assets/avatars/avatar.jpg",
-  "lockBackground": "assets/bg/background.jpg",
-  "backgroundImage": "assets/bg/background.jpg",
+  "lockBackground": "assets/bg/lock-bg.jpg",
+  "callingBackground": "assets/bg/calling-bg.jpg",
+  "phoneCallBackground": "assets/bg/phonecall-bg.jpg",
+  "endingBackground": "assets/bg/ending-bg.jpg",
   "ringtone": "assets/audio/ringtone.mp3",
   "callAudio": "assets/audio/message.mp3",
   "video": "assets/videos/message.mp4",
@@ -70,8 +76,8 @@ phonecall/
 ```
 
 - `callerName` / `callerPhone` / `callingText` / `endingText`:畫面上顯示的文字,直接改字串即可
-- `callerAvatar` / `lockBackground` / `backgroundImage` / `ringtone` / `callAudio` / `video`:填入相對路徑
-  - `lockBackground` 沒填的話,會自動沿用 `backgroundImage`
+- `callerAvatar` / `ringtone` / `callAudio` / `video`:填入相對路徑
+- `lockBackground` / `callingBackground` / `phoneCallBackground` / `endingBackground`:四個畫面各自獨立的背景圖,**互不 fallback**——任一個沒填路徑(或路徑錯誤),該畫面就顯示灰底(`#4a4a4a`),不會套用其他畫面的圖
   - `callAudio` 是按「電話」接聽後播放的音檔;`video` 是按「視訊」接聽後播放的影片,兩者互不影響
 - `vibrateOnRing`:接聽當下是否觸發手機震動(僅支援部分行動瀏覽器)
 - `loopVideo` / `loopCallAudio`:影片 / 電話音檔播完是否自動重播(`true`)或跳到結尾畫面(`false`)

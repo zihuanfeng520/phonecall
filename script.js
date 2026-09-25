@@ -63,13 +63,11 @@
   callingTextEl.textContent = config.callingText || '邀請你視訊通話...';
   endingTextEl.textContent = config.endingText || '';
 
-  const lockBg = config.lockBackground || config.backgroundImage;
-  if (lockBg) bgLockLayer.style.backgroundImage = `url("${lockBg}")`;
-  if (config.backgroundImage) {
-    bgLayer.style.backgroundImage = `url("${config.backgroundImage}")`;
-    bgLayerEnd.style.backgroundImage = `url("${config.backgroundImage}")`;
-    bgPhoneLayer.style.backgroundImage = `url("${config.backgroundImage}")`;
-  }
+  // 四個畫面的背景各自獨立,沒設定就維持 CSS 預設的灰底,不互相 fallback
+  if (config.lockBackground) bgLockLayer.style.backgroundImage = `url("${config.lockBackground}")`;
+  if (config.callingBackground) bgLayer.style.backgroundImage = `url("${config.callingBackground}")`;
+  if (config.phoneCallBackground) bgPhoneLayer.style.backgroundImage = `url("${config.phoneCallBackground}")`;
+  if (config.endingBackground) bgLayerEnd.style.backgroundImage = `url("${config.endingBackground}")`;
   if (config.ringtone) {
     ringtoneAudio.src = config.ringtone;
     ringtoneAudio.load();
