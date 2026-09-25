@@ -275,6 +275,7 @@ html, body{
 /* ===================== 電話通話畫面 ===================== */
 #phoneCallScreen{
   justify-content:flex-start;
+  overflow-y:auto; /* 版面高度不夠時改成可以捲動,避免內容跟掛斷鍵疊在一起 */
 }
 .call-topbar{
   margin-top: calc(3vh + env(safe-area-inset-top,0px));
@@ -288,6 +289,7 @@ html, body{
   border-radius:50%;
   overflow:hidden;
   border:2px solid color-mix(in srgb, var(--text-color, #fff) 50%, transparent);
+  flex-shrink:0;
 }
 .call-avatar{
   width:100%;
@@ -319,6 +321,7 @@ html, body{
   grid-template-columns: repeat(3, 1fr);
   gap: 1.625rem 2.125rem;
   padding: 0 12%;
+  flex-shrink:0;
 }
 .call-grid-item{
   display:flex;
@@ -364,8 +367,6 @@ html, body{
 .icon-add{ -webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'); mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'); }
 
 .hangup-btn{
-  position:absolute;
-  bottom: calc(7vh + env(safe-area-inset-bottom,0px));
   width:4.375rem;
   height:4.375rem;
   border-radius:50%;
@@ -375,8 +376,23 @@ html, body{
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  flex-shrink:0;
 }
 .hangup-icon{ width:1.875rem; height:1.875rem; fill:#fff; }
+
+/* 視訊畫面:掛斷鍵要浮在整片影片上面,維持絕對定位 */
+#videoHangupBtn{
+  position:absolute;
+  bottom: calc(7vh + env(safe-area-inset-bottom,0px));
+}
+
+/* 電話通話畫面:掛斷鍵改成跟著排版流程走,margin-top:auto 讓它自動被推到
+   剩餘空間的最下面,不會再跟上面的九宮格疊在一起;版面真的太矮時
+   會連同上面內容一起變成可捲動(見 #phoneCallScreen 的 overflow-y:auto) */
+#hangupBtn{
+  margin-top:auto;
+  margin-bottom: calc(4vh + env(safe-area-inset-bottom,0px));
+}
 
 /* ===================== 影片畫面 ===================== */
 #videoScreen{ background:#000; justify-content:center; }
