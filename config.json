@@ -5,7 +5,7 @@
   "lockBackground": "assets/bg/lock-bg.jpg",
   "callingBackground": "assets/bg/calling-bg.jpg",
   "phoneCallBackground": "",
-  "endingBackground": "",
+  "endingBackground": "ending-bg.jpg",
   "ringtone": "assets/audio/ringtone.mp3",
   "callAudio": "assets/audio/message.mp3",
   "video": "assets/videos/message.mp4",
