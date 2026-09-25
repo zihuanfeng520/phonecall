@@ -20,7 +20,7 @@ html, body{
   display:none;
   flex-direction:column;
   align-items:center;
-  color:#fff;
+  color: var(--text-color, #fff); /* 沒偵測到背景圖時預設白字;偵測到會被 JS 覆寫成 --text-color */
   text-align:center;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -72,7 +72,7 @@ html, body{
   position:relative;
   width:22px;
   height:11px;
-  border:1.5px solid #fff;
+  border:1.5px solid var(--text-color, #fff);
   border-radius:2px;
   display:inline-block;
 }
@@ -83,14 +83,14 @@ html, body{
   top:3px;
   width:2px;
   height:5px;
-  background:#fff;
+  background: var(--text-color, #fff);
   border-radius:0 1px 1px 0;
 }
 .battery-fill{
   display:block;
   height:100%;
   width:99%;
-  background:#fff;
+  background: var(--text-color, #fff);
 }
 
 .day-progress-wrap{
@@ -107,13 +107,13 @@ html, body{
   width:100%;
   height:6px;
   border-radius:999px;
-  background:rgba(255,255,255,.25);
+  background: var(--text-color-25, rgba(255,255,255,.25));
   overflow:hidden;
 }
 .day-progress-fill{
   height:100%;
   width:0%;
-  background:#fff;
+  background: var(--text-color, #fff);
   border-radius:999px;
   transition:width 1s linear;
 }
@@ -154,7 +154,8 @@ html, body{
   width:56px;
   height:56px;
   border-radius:50%;
-  background:rgba(255,255,255,.9);
+  background: var(--text-color, #fff);
+  opacity:.9;
   box-shadow:0 2px 10px rgba(0,0,0,.35);
 }
 /* 只有放開手回彈/確認解鎖時才有過渡動畫,拖曳中不加,避免手感延遲 */
@@ -318,7 +319,7 @@ html, body{
   justify-content:center;
 }
 .call-grid-item.active .call-icon-circle{
-  background:#fff;
+  background: var(--text-color, #fff);
 }
 .call-grid-item.active .call-icon-circle span{
   filter: invert(1);
@@ -327,7 +328,7 @@ html, body{
   width:22px;
   height:22px;
   display:inline-block;
-  background:#fff;
+  background: currentColor; /* 跟著 .screen 的 color(也就是 --text-color)自動變 */
   -webkit-mask-size:contain;
   mask-size:contain;
   -webkit-mask-repeat:no-repeat;

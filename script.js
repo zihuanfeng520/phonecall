@@ -69,6 +69,56 @@
   if (config.callingBackground) bgLayer.style.backgroundImage = `url("${config.callingBackground}")`;
   if (config.phoneCallBackground) bgPhoneLayer.style.backgroundImage = `url("${config.phoneCallBackground}")`;
   if (config.endingBackground) bgLayerEnd.style.backgroundImage = `url("${config.endingBackground}")`;
+
+  // ===== 依背景圖亮度自動決定文字要黑字還是白字 =====
+  // 把圖片畫進一張很小的 canvas(40x40 就夠了,不用整張原圖尺寸),
+  // 讀出所有像素算加權平均亮度(人眼對綠色最敏感、藍色最不敏感,
+  // 所以用 0.299R + 0.587G + 0.114B 這組常見的感知亮度公式),
+  // 亮度偏高(圖片整體偏亮)→ 用深色文字;偏暗 → 用白色文字。
+  function sampleImageBrightness(url, callback) {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const size = 40;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, size, size);
+        const data = ctx.getImageData(0, 0, size, size).data;
+        let total = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          total += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        }
+        callback(total / (data.length / 4)); // 平均亮度,範圍 0~255
+      } catch (e) {
+        // 常見於圖片跨網域且該網域沒開放 CORS,瀏覽器會把 canvas 標記為「已汙染」
+        // 禁止讀取像素資料;這種情況就放棄偵測,維持 CSS 預設白字
+        console.error('讀取圖片亮度失敗(可能是跨網域圖片沒有 CORS 授權)', e);
+        callback(null);
+      }
+    };
+    img.onerror = () => callback(null);
+    img.src = url;
+  }
+
+  function applyAdaptiveTextColor(screenEl, imageUrl) {
+    if (!imageUrl) return; // 沒設定背景圖,維持 CSS 預設值,不用偵測
+    sampleImageBrightness(imageUrl, (avgBrightness) => {
+      if (avgBrightness === null) return;
+      const isBright = avgBrightness > 150;
+      const textColor = isBright ? '#1a1a1a' : '#ffffff';
+      // 給半透明的裝飾元件(進度條軌道等)用的「25% 透明度版本」
+      const textColor25 = isBright ? 'rgba(26,26,26,.25)' : 'rgba(255,255,255,.25)';
+      screenEl.style.setProperty('--text-color', textColor);
+      screenEl.style.setProperty('--text-color-25', textColor25);
+    });
+  }
+
+  applyAdaptiveTextColor(screens.lock, config.lockBackground);
+  applyAdaptiveTextColor(screens.calling, config.callingBackground);
+  applyAdaptiveTextColor(screens.phoneCall, config.phoneCallBackground);
+  applyAdaptiveTextColor(screens.ending, config.endingBackground);
   if (config.ringtone) {
     ringtoneAudio.src = config.ringtone;
     ringtoneAudio.load();
