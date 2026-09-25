@@ -14,6 +14,27 @@ html, body{
   user-select:none;
 }
 
+/* 手機卡片容器:寬度在手機上就是滿版(跟現在一樣);寬度一超過 480px(平板/桌機)
+   就不再變寬,直接置中變成一張固定寬度的「手機卡片」,外圍露出的部分是純黑背景。
+   關鍵是 transform 這一行:它會讓裡面所有 position:fixed 的畫面,從「相對整個瀏覽器視窗」
+   改成「相對這個容器」,這是 CSS 的固定寫法(fixed 定位遇到祖先有 transform 時,
+   會改成以那個祖先為基準),不需要把 .screen 全部從 fixed 改寫成 absolute。 */
+#appFrame{
+  position:relative;
+  width:100%;
+  max-width:480px;
+  height:100vh;   /* 給不支援 dvh 的舊瀏覽器當備援值 */
+  height:100dvh;  /* 動態視窗高度,手機瀏覽器網址列收合/展開時也會自動修正,比 100vh 準確 */
+  margin:0 auto;
+  overflow:hidden;
+  transform: translateZ(0);
+}
+@media (min-width:481px){
+  #appFrame{
+    box-shadow: 0 0 60px rgba(0,0,0,.6);
+  }
+}
+
 .screen{
   position:fixed;
   inset:0;
@@ -27,8 +48,6 @@ html, body{
   z-index:1;
 }
 .screen.active{ display:flex; }
-
-
 
 .bg-layer{
   position:absolute;
@@ -56,22 +75,22 @@ html, body{
   letter-spacing:.02em;
 }
 .lock-date{
-  margin-top:6px;
+  margin-top:.375rem;
   font-size:1rem;
   opacity:.85;
 }
 .lock-battery{
-  margin-top:16px;
+  margin-top:1rem;
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:.375rem;
   font-size:.85rem;
   opacity:.9;
 }
 .battery-icon{
   position:relative;
-  width:22px;
-  height:11px;
+  width:1.375rem;
+  height:.6875rem;
   border:1.5px solid var(--text-color, #fff);
   border-radius:2px;
   display:inline-block;
@@ -79,10 +98,10 @@ html, body{
 .battery-icon::after{
   content:"";
   position:absolute;
-  right:-4px;
-  top:3px;
-  width:2px;
-  height:5px;
+  right:-.25rem;
+  top:.1875rem;
+  width:.125rem;
+  height:.3125rem;
   background: var(--text-color, #fff);
   border-radius:0 1px 1px 0;
 }
@@ -94,18 +113,18 @@ html, body{
 }
 
 .day-progress-wrap{
-  margin-top:28px;
+  margin-top:1.75rem;
   width:70%;
-  max-width:320px;
+  max-width:20rem;
 }
 .day-progress-label{
   font-size:.75rem;
   opacity:.75;
-  margin-bottom:6px;
+  margin-bottom:.375rem;
 }
 .day-progress-track{
   width:100%;
-  height:6px;
+  height:.375rem;
   border-radius:999px;
   /* 半透明版本:跟文字同色,只是混入 25% 透明度,不用額外多定義一個變數 */
   background: color-mix(in srgb, var(--text-color, #fff) 25%, transparent);
@@ -134,7 +153,7 @@ html, body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  margin-bottom:14px;
+  margin-bottom:.875rem;
   animation: hintFloat 1.6s ease-in-out infinite;
 }
 .chevron{
@@ -145,15 +164,15 @@ html, body{
 .swipe-text{
   font-size:.85rem;
   opacity:.8;
-  margin-top:2px;
+  margin-top:.125rem;
 }
 @keyframes hintFloat{
   0%,100%{ transform:translateY(0); opacity:.55; }
-  50%{ transform:translateY(-8px); opacity:1; }
+  50%{ transform:translateY(-.5rem); opacity:1; }
 }
 .swipe-handle{
-  width:56px;
-  height:56px;
+  width:3.5rem;
+  height:3.5rem;
   border-radius:50%;
   background: var(--text-color, #fff);
   opacity:.9;
@@ -173,39 +192,39 @@ html, body{
 .avatar-wrap{
   position:relative;
   margin-top: 10vh;
-  width:180px;
-  height:180px;
+  width:11.25rem;
+  height:11.25rem;
 }
 .avatar-ring{
   position:absolute;
-  inset:-14px;
-  border-radius:16px;
+  inset:-.875rem;
+  border-radius:1rem;
   border:3px solid rgba(255,215,0,.9);
   box-shadow:0 0 0 0 rgba(255,215,0,.6);
   animation: pulseGlow 1.8s ease-out infinite;
 }
 @keyframes pulseGlow{
   0%   { box-shadow:0 0 0 0 rgba(255,215,0,.55); }
-  70%  { box-shadow:0 0 0 22px rgba(255,215,0,0); }
+  70%  { box-shadow:0 0 0 1.375rem rgba(255,215,0,0); }
   100% { box-shadow:0 0 0 0 rgba(255,215,0,0); }
 }
 .avatar{
   width:100%;
   height:100%;
   object-fit:cover;
-  border-radius:12px;
+  border-radius:.75rem;
   border:2px solid rgba(255,215,0,.9);
   background:#ccc;
 }
 
 .caller-name{
-  margin-top:24px;
+  margin-top:1.5rem;
   font-size:2rem;
   font-weight:600;
   letter-spacing:.05em;
 }
 .calling-text{
-  margin-top:12px;
+  margin-top:.75rem;
   font-size:1.1rem;
   opacity:.85;
 }
@@ -214,33 +233,33 @@ html, body{
   position:absolute;
   bottom: calc(8vh + env(safe-area-inset-bottom,0px));
   display:flex;
-  gap:54px;
+  gap:3.375rem;
 }
 .answer-item{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:10px;
+  gap:.625rem;
 }
 .answer-btn-box{
   position:relative;
-  width:70px;
-  height:70px;
+  width:4.375rem;
+  height:4.375rem;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 .ripple-svg{
   position:absolute;
-  width:160px;
-  height:160px;
+  width:10rem;
+  height:10rem;
   pointer-events:none;
 }
 .answer-btn{
   position:relative;
   z-index:1;
-  width:70px;
-  height:70px;
+  width:4.375rem;
+  height:4.375rem;
   border-radius:50%;
   border:none;
   display:flex;
@@ -250,7 +269,7 @@ html, body{
 }
 .phone-answer{ background:var(--accent); }
 .video-answer{ background:var(--accent-video); }
-.phone-icon{ width:30px; height:30px; fill:#fff; }
+.phone-icon{ width:1.875rem; height:1.875rem; fill:#fff; }
 .answer-label{ font-size:.9rem; opacity:.9; }
 
 /* ===================== 電話通話畫面 ===================== */
@@ -264,8 +283,8 @@ html, body{
 }
 .call-avatar-wrap{
   margin-top:8vh;
-  width:120px;
-  height:120px;
+  width:7.5rem;
+  height:7.5rem;
   border-radius:50%;
   overflow:hidden;
   border:2px solid color-mix(in srgb, var(--text-color, #fff) 50%, transparent);
@@ -277,18 +296,18 @@ html, body{
   background:#333;
 }
 .call-name{
-  margin-top:18px;
+  margin-top:1.125rem;
   font-size:1.5rem;
   font-weight:600;
 }
 .call-number{
-  margin-top:6px;
+  margin-top:.375rem;
   font-size:.95rem;
   opacity:.75;
   letter-spacing:.03em;
 }
 .call-duration{
-  margin-top:10px;
+  margin-top:.625rem;
   font-size:1rem;
   opacity:.85;
   font-variant-numeric: tabular-nums;
@@ -298,21 +317,21 @@ html, body{
   margin-top:6vh;
   display:grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 26px 34px;
+  gap: 1.625rem 2.125rem;
   padding: 0 12%;
 }
 .call-grid-item{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:8px;
+  gap:.5rem;
   font-size:.8rem;
   opacity:.9;
   cursor:pointer;
 }
 .call-icon-circle{
-  width:56px;
-  height:56px;
+  width:3.5rem;
+  height:3.5rem;
   border-radius:50%;
   background: color-mix(in srgb, var(--text-color, #fff) 12%, transparent);
   display:flex;
@@ -326,8 +345,8 @@ html, body{
   filter: invert(1);
 }
 .icon-contact, .icon-mute, .icon-note, .icon-speaker, .icon-hold, .icon-add{
-  width:22px;
-  height:22px;
+  width:1.375rem;
+  height:1.375rem;
   display:inline-block;
   background: currentColor; /* 跟著 .screen 的 color(也就是 --text-color)自動變 */
   -webkit-mask-size:contain;
@@ -347,8 +366,8 @@ html, body{
 .hangup-btn{
   position:absolute;
   bottom: calc(7vh + env(safe-area-inset-bottom,0px));
-  width:70px;
-  height:70px;
+  width:4.375rem;
+  height:4.375rem;
   border-radius:50%;
   border:none;
   background:#e74c3c;
@@ -357,7 +376,7 @@ html, body{
   justify-content:center;
   cursor:pointer;
 }
-.hangup-icon{ width:30px; height:30px; fill:#fff; }
+.hangup-icon{ width:1.875rem; height:1.875rem; fill:#fff; }
 
 /* ===================== 影片畫面 ===================== */
 #videoScreen{ background:#000; justify-content:center; }
@@ -369,11 +388,11 @@ html, body{
   font-size:2.2rem;
   line-height:1.4;
   font-weight:600;
-  padding:0 24px;
+  padding:0 1.5rem;
 }
 .replay-btn{
-  margin-top:32px;
-  padding:14px 32px;
+  margin-top:2rem;
+  padding:.875rem 2rem;
   border-radius:999px;
   border:1px solid color-mix(in srgb, var(--text-color, #fff) 60%, transparent);
   background:transparent;

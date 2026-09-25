@@ -4,9 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>視訊來電</title>
+<script>
+  // 自適應縮放:仿照常見手機網頁的「rem 縮放」做法,依螢幕寬度即時算出根字體大小,
+  // 所有用 rem 寫的尺寸(字級、頭像、按鈕大小...)都會跟著等比例放大縮小。
+  // 這段要放在 CSS 載入前先執行,才不會有畫面先出現小尺寸、之後才跳成正確大小的閃爍。
+  (function (win, doc) {
+    var docEl = doc.documentElement;
+    var BASELINE_WIDTH = 360; // 設計基準寬度:在這個寬度下,1rem = 16px(也就是目前寫的所有 rem 數值當初設計時的樣子)
+    var APP_MAX_WIDTH = 480;  // 要跟 style.css 裡 #appFrame 的 max-width 保持一致:寬度超過這裡,版面就不再放大,直接置中變成一張「手機卡片」
+    var MIN_FONT = 13;        // 螢幕再窄也不會小於這個字級基準
+    var MAX_FONT = (APP_MAX_WIDTH / BASELINE_WIDTH) * 16;
+
+    function setRootFontSize() {
+      var width = Math.min(docEl.clientWidth || win.innerWidth, APP_MAX_WIDTH);
+      var size = (width / BASELINE_WIDTH) * 16;
+      size = Math.max(MIN_FONT, Math.min(MAX_FONT, size));
+      docEl.style.fontSize = size + 'px';
+    }
+    setRootFontSize();
+    win.addEventListener('resize', setRootFontSize);
+    win.addEventListener('orientationchange', setRootFontSize);
+  })(window, document);
+</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="appFrame">
 
   <!-- 鎖屏畫面 -->
   <section id="lockScreen" class="screen active">
@@ -174,6 +197,8 @@
 
   <audio id="ringtoneAudio" loop></audio>
   <audio id="callAudio"></audio>
+
+</div><!-- /#appFrame -->
 
   <script src="script.js"></script>
 </body>
