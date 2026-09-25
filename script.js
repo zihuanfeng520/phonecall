@@ -124,67 +124,99 @@
   }
   // 不支援 Battery API(多數桌機瀏覽器/iOS)則維持預設值,不再做其他嘗試
 
-  // ================= 鎖屏:上滑解鎖手勢 =================
+  // ================= 鎖屏:上滑解鎖手勢(改用淡出淡入,不做方向性平移揭示) =================
   let dragging = false;
   let startY = 0;
-  let currentTranslate = 0;
-  const UNLOCK_THRESHOLD_RATIO = 0.32; // 需滑超過螢幕高度的 32% 才算解鎖成功
+  let dragDelta = 0; // 往上拖為負值
+  const UNLOCK_THRESHOLD_RATIO = 0.28; // 需滑超過螢幕高度的 28% 才算解鎖成功
 
-  function getScreenHeight() { return window.innerHeight; }
+  function getThresholdPx() { return window.innerHeight * UNLOCK_THRESHOLD_RATIO; }
+  function getProgress() { return Math.min(1, Math.abs(dragDelta) / getThresholdPx()); }
 
   function onDragStart(clientY) {
     dragging = true;
     startY = clientY;
-    lockScreenEl.classList.remove('unlocking', 'spring-back');
-    // 注意:拖曳過程中「不」提前顯示響鈴畫面。
-    // 因為鎖屏往上移動時,最先露出的是畫面最下方(響鈴畫面的接聽按鈕正好在那裡),
-    // 拖曳中途就先曝出按鈕會很奇怪,所以響鈴畫面只在真正解鎖成功那一刻才出現。
+    dragDelta = 0;
+
+    // 放開手才會有的過渡動畫先清掉,確保拖曳當下是 1:1 跟手指走、沒有動畫延遲
+    lockScreenEl.classList.remove('animating');
+    swipeHandle.classList.remove('snap');
+    screens.calling.classList.remove('crossfading');
+
+    // 響鈴畫面先墊在底下(opacity:0),拖曳時兩層用透明度做溶接,不是平移揭示,
+    // 所以不會有「畫面下緣的按鈕先被曝出來」的方向性問題。
+    screens.calling.classList.add('active');
+    screens.calling.style.opacity = '0';
+  }
+
+  function applyDragVisuals() {
+    const progress = getProgress(); // 0~1
+    lockScreenEl.style.opacity = String(1 - progress);
+    lockScreenEl.style.transform = `scale(${1 + progress * 0.03})`;
+    screens.calling.style.opacity = String(progress);
+    swipeHandle.style.transform = `translateY(${Math.max(dragDelta, -90)}px)`;
   }
 
   function onDragMove(clientY) {
     if (!dragging) return;
-    let delta = clientY - startY; // 往上滑時為負值
-    if (delta > 0) delta = 0; // 不允許往下拖出畫面
-    currentTranslate = delta;
-    lockScreenEl.style.transform = `translateY(${delta}px)`;
+    let delta = clientY - startY;
+    if (delta > 0) delta = 0; // 不允許往下拖
+    dragDelta = delta;
+    applyDragVisuals();
   }
 
   function onDragEnd() {
     if (!dragging) return;
     dragging = false;
 
-    const dragged = Math.abs(currentTranslate);
-    const threshold = getScreenHeight() * UNLOCK_THRESHOLD_RATIO;
-
-    if (dragged >= threshold) {
+    if (getProgress() >= 1) {
       unlockSuccess();
     } else {
-      // 未達門檻:回彈,不解鎖、不播放鈴聲(拖曳過程本來就沒有墊底畫面,回彈不用額外清理)
-      lockScreenEl.classList.add('spring-back');
-      lockScreenEl.style.transform = 'translateY(0)';
-      currentTranslate = 0;
+      springBack();
     }
   }
 
-  function unlockSuccess() {
-    // 響鈴畫面淡入 + 輕微放大,跟鎖屏往上滑同步進行,視覺上是「揭開」而不是切換
-    screens.calling.classList.add('reveal-enter');
-    // 強制觸發 reflow,確保下一行加上 reveal-enter-active 時瀏覽器會跑轉場動畫
-    void screens.calling.offsetWidth;
-    screens.calling.classList.add('reveal-enter-active');
+  function springBack() {
+    // 未達門檻:淡回滿版鎖屏,不解鎖、不播放鈴聲
+    lockScreenEl.classList.add('animating');
+    swipeHandle.classList.add('snap');
+    lockScreenEl.style.opacity = '1';
+    lockScreenEl.style.transform = 'scale(1)';
+    swipeHandle.style.transform = 'translateY(0)';
+    screens.calling.classList.add('crossfading');
+    screens.calling.style.opacity = '0';
 
-    lockScreenEl.classList.add('unlocking');
-    lockScreenEl.style.transform = 'translateY(-100%)';
+    const onEnd = () => {
+      lockScreenEl.removeEventListener('transitionend', onEnd);
+      lockScreenEl.classList.remove('animating');
+      screens.calling.classList.remove('active', 'crossfading');
+      screens.calling.style.opacity = '';
+    };
+    lockScreenEl.addEventListener('transitionend', onEnd);
+  }
+
+  function unlockSuccess() {
+    // 達門檻:繼續淡到底,鎖屏完全透明、響鈴畫面完全不透明
+    lockScreenEl.classList.add('animating');
+    swipeHandle.classList.add('snap');
+    lockScreenEl.style.opacity = '0';
+    lockScreenEl.style.transform = 'scale(1.03)';
+    screens.calling.classList.add('crossfading');
+    screens.calling.style.opacity = '1';
 
     // 解鎖動作是使用者手勢的直接延續,在此同步呼叫 play() 才符合瀏覽器自動播放政策
     ringtoneAudio.play().catch(() => {});
 
-    const onTransitionEnd = () => {
-      lockScreenEl.removeEventListener('transitionend', onTransitionEnd);
-      screens.calling.classList.remove('reveal-enter', 'reveal-enter-active');
+    const onEnd = () => {
+      lockScreenEl.removeEventListener('transitionend', onEnd);
+      lockScreenEl.classList.remove('animating');
+      lockScreenEl.style.opacity = '';
+      lockScreenEl.style.transform = '';
+      screens.calling.classList.remove('crossfading');
+      screens.calling.style.opacity = '';
       showScreen('calling');
     };
-    lockScreenEl.addEventListener('transitionend', onTransitionEnd);
+    lockScreenEl.addEventListener('transitionend', onEnd);
   }
 
   swipeHandle.addEventListener('touchstart', e => onDragStart(e.touches[0].clientY), { passive: true });
@@ -271,9 +303,14 @@
 
   // ================= 重新播放 =================
   replayBtn.addEventListener('click', () => {
-    // 回到鎖屏,重新走一次完整流程
-    lockScreenEl.classList.remove('unlocking', 'spring-back');
-    lockScreenEl.style.transform = 'translateY(0)';
+    // 回到鎖屏,重新走一次完整流程,並清掉所有拖曳/動畫留下的行內樣式
+    lockScreenEl.classList.remove('animating');
+    lockScreenEl.style.opacity = '';
+    lockScreenEl.style.transform = '';
+    swipeHandle.classList.remove('snap');
+    swipeHandle.style.transform = '';
+    screens.calling.classList.remove('active', 'crossfading');
+    screens.calling.style.opacity = '';
     showScreen('lock');
   });
 })();
