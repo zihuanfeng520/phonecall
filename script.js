@@ -136,6 +136,9 @@
     dragging = true;
     startY = clientY;
     lockScreenEl.classList.remove('unlocking', 'spring-back');
+    // 注意:拖曳過程中「不」提前顯示響鈴畫面。
+    // 因為鎖屏往上移動時,最先露出的是畫面最下方(響鈴畫面的接聽按鈕正好在那裡),
+    // 拖曳中途就先曝出按鈕會很奇怪,所以響鈴畫面只在真正解鎖成功那一刻才出現。
   }
 
   function onDragMove(clientY) {
@@ -156,7 +159,7 @@
     if (dragged >= threshold) {
       unlockSuccess();
     } else {
-      // 未達門檻:回彈,不解鎖、不播放鈴聲
+      // 未達門檻:回彈,不解鎖、不播放鈴聲(拖曳過程本來就沒有墊底畫面,回彈不用額外清理)
       lockScreenEl.classList.add('spring-back');
       lockScreenEl.style.transform = 'translateY(0)';
       currentTranslate = 0;
@@ -164,6 +167,12 @@
   }
 
   function unlockSuccess() {
+    // 響鈴畫面淡入 + 輕微放大,跟鎖屏往上滑同步進行,視覺上是「揭開」而不是切換
+    screens.calling.classList.add('reveal-enter');
+    // 強制觸發 reflow,確保下一行加上 reveal-enter-active 時瀏覽器會跑轉場動畫
+    void screens.calling.offsetWidth;
+    screens.calling.classList.add('reveal-enter-active');
+
     lockScreenEl.classList.add('unlocking');
     lockScreenEl.style.transform = 'translateY(-100%)';
 
@@ -172,6 +181,7 @@
 
     const onTransitionEnd = () => {
       lockScreenEl.removeEventListener('transitionend', onTransitionEnd);
+      screens.calling.classList.remove('reveal-enter', 'reveal-enter-active');
       showScreen('calling');
     };
     lockScreenEl.addEventListener('transitionend', onTransitionEnd);
