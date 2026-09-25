@@ -40,6 +40,7 @@
   const callDurationEl = document.getElementById('callDuration');
   const callClockEl = document.getElementById('callClock');
   const hangupBtn = document.getElementById('hangupBtn');
+  const videoHangupBtn = document.getElementById('videoHangupBtn');
   const muteToggle = document.getElementById('muteToggle');
   const speakerToggle = document.getElementById('speakerToggle');
   const holdToggle = document.getElementById('holdToggle');
@@ -259,16 +260,19 @@
 
   let callStartTime = null;
   let callTimerInterval = null;
+  let holdPausedAt = null; // 暫停通話的當下時間點,用來把暫停期間從總秒數扣掉
+
+  function tickDuration() {
+    const elapsedSec = Math.floor((Date.now() - callStartTime) / 1000);
+    const m = pad(Math.floor(elapsedSec / 60));
+    const s = pad(elapsedSec % 60);
+    callDurationEl.textContent = `${m}:${s}`;
+  }
 
   function startCallTimer() {
     callStartTime = Date.now();
     callDurationEl.textContent = '00:00';
-    callTimerInterval = setInterval(() => {
-      const elapsedSec = Math.floor((Date.now() - callStartTime) / 1000);
-      const m = pad(Math.floor(elapsedSec / 60));
-      const s = pad(elapsedSec % 60);
-      callDurationEl.textContent = `${m}:${s}`;
-    }, 1000);
+    callTimerInterval = setInterval(tickDuration, 1000);
   }
 
   function stopCallTimer() {
@@ -276,11 +280,54 @@
     callTimerInterval = null;
   }
 
+  // ===== 暫停通話:計時器停止 + 通話音檔暫停,再按一次恢復兩者 =====
+  function pauseCallForHold() {
+    holdPausedAt = Date.now();
+    clearInterval(callTimerInterval);
+    callTimerInterval = null;
+    callAudio.pause();
+  }
+
+  function resumeCallFromHold() {
+    if (holdPausedAt !== null) {
+      // 把暫停期間的時長補回 callStartTime,秒數才會接著暫停前繼續算,不會多跳
+      callStartTime += (Date.now() - holdPausedAt);
+      holdPausedAt = null;
+    }
+    callAudio.play().catch(() => {});
+    callTimerInterval = setInterval(tickDuration, 1000);
+  }
+
+  // ===== 擴音:用 Web Audio 的 GainNode 做訊號放大,一般 audio.volume 最大只能到
+  // 原始音量的 100%,沒辦法「比平常大聲」,只有走這條路才能真的放大超過 100% =====
+  let audioCtx = null;
+  let gainNode = null;
+  let audioGraphReady = false;
+
+  function ensureAudioGraph() {
+    if (audioGraphReady) return;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextClass();
+      const source = audioCtx.createMediaElementSource(callAudio);
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = 1; // 預設 = 原始音量
+      source.connect(gainNode).connect(audioCtx.destination);
+      audioGraphReady = true;
+    } catch (e) {
+      console.error('無法建立音量增益節點,擴音將維持原本音量', e);
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  }
+
   answerPhoneBtn.addEventListener('click', () => {
     vibrateIfEnabled();
     stopRingtone();
     showScreen('phoneCall');
     startCallTimer();
+    ensureAudioGraph(); // 必須在使用者手勢(這次點擊)當下建立,瀏覽器才允許出聲
     callAudio.currentTime = 0;
     callAudio.play().catch(() => {});
   });
@@ -297,13 +344,44 @@
   function toggleGridItem(el) {
     el.classList.toggle('active');
   }
-  muteToggle.addEventListener('click', () => toggleGridItem(muteToggle));
-  speakerToggle.addEventListener('click', () => toggleGridItem(speakerToggle));
-  holdToggle.addEventListener('click', () => toggleGridItem(holdToggle));
 
-  hangupBtn.addEventListener('click', () => {
+  // 靜音:僅視覺切換(這裡指的是「靜音麥克風」,網頁本來就不會收音,故無實際功能)
+  muteToggle.addEventListener('click', () => toggleGridItem(muteToggle));
+
+  // 擴音:切換 GainNode 的放大倍率,開啟時比原始音量大 50%
+  speakerToggle.addEventListener('click', () => {
+    const isOn = speakerToggle.classList.toggle('active');
+    if (gainNode) {
+      gainNode.gain.value = isOn ? 1.5 : 1;
+    }
+  });
+
+  // 暫停通話:真的暫停計時器 + 暫停音檔,再按一次恢復
+  holdToggle.addEventListener('click', () => {
+    const isHeld = holdToggle.classList.toggle('active');
+    if (isHeld) {
+      pauseCallForHold();
+    } else {
+      resumeCallFromHold();
+    }
+  });
+
+  function endPhoneCall() {
     callAudio.pause();
     stopCallTimer();
+    holdPausedAt = null;
+    holdToggle.classList.remove('active');
+    speakerToggle.classList.remove('active');
+    muteToggle.classList.remove('active');
+    if (gainNode) gainNode.gain.value = 1;
+    showScreen('ending');
+  }
+
+  hangupBtn.addEventListener('click', endPhoneCall);
+
+  // ================= 視訊畫面:掛斷 =================
+  videoHangupBtn.addEventListener('click', () => {
+    callVideo.pause();
     showScreen('ending');
   });
 
